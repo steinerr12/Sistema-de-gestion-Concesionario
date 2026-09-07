@@ -6,6 +6,8 @@ class Program
     {
         // Instancia de las clases de cada módulo
         AsistenciayPuntualidad asistencia = new AsistenciayPuntualidad();
+        GestorTurnosVacaciones turnosVacaciones = new GestorTurnosVacaciones();
+        
 
         int opcion = 0;
 
@@ -34,10 +36,10 @@ class Program
                         
                         break;
                     case 3: //Turno y Vacaciones
-                        
+                        turnosVacaciones.Menu();
                         break;
                     case 4: //venta e inventario
-                        
+                      
                         break;
                     case 5:
                         Console.WriteLine("\nSaliendo del sistema... ¡Hasta luego!");

@@ -24,6 +24,25 @@ public class SolicitudVacacion
     public DateTime FechaInicio { get; set; }
     public DateTime FechaFin { get; set; }
 }
+public class Turno
+{
+    public string CodigoEmpleado { get; set; }
+    public string Dia { get; set; }
+    public string HoraInicio { get; set; }
+    public string HoraFin { get; set; }
+}
+
+public class Factura
+{
+    public int Numero { get; set; }
+    public string CodigoVendedor { get; set; }
+    public string Cliente { get; set; }
+    public string DescripcionVehiculo { get; set; }
+    public double Precio { get; set; }
+    public double PorcentajeImpuesto { get; set; }
+    public double Total { get; set; }
+    public DateTime Fecha { get; set; }
+}
 
 public static class DatosCompartidos
 {
@@ -40,4 +59,6 @@ public static class DatosCompartidos
     // Listas donde se guardará la información compartida
     public static List<RegistroAsistencia> HistorialAsistencias = new List<RegistroAsistencia>();
     public static List<SolicitudVacacion> SolicitudesVacaciones = new List<SolicitudVacacion>();
+    public static List<Turno> ListaTurnos = new List<Turno>();
+    public static List<Factura> ListaFacturas = new List<Factura>();
 }
