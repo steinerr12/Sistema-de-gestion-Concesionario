@@ -7,7 +7,7 @@ public class Vehiculo
     public string Codigo { get; set; }
     public string Marca { get; set; }
     public string Modelo { get; set; }
-    public int Anio { get; set; }
+    public int Año { get; set; }
     public double Precio { get; set; }
     public bool Disponible { get; set; }
 }
@@ -17,11 +17,11 @@ public class ControlVentasInventario
     // Catálogo disponible del concesionario
     public static List<Vehiculo> InventarioVehiculos = new List<Vehiculo>()
     {
-        new Vehiculo { Codigo = "V01", Marca = "Toyota", Modelo = "Corolla", Anio = 2024, Precio = 22000.00, Disponible = true },
-        new Vehiculo { Codigo = "V02", Marca = "Nissan", Modelo = "Frontier", Anio = 2023, Precio = 28000.00, Disponible = true },
-        new Vehiculo { Codigo = "V03", Marca = "Honda", Modelo = "Civic", Anio = 2024, Precio = 25500.00, Disponible = true },
-        new Vehiculo { Codigo = "V04", Marca = "Hyundai", Modelo = "Tucson", Anio = 2025, Precio = 31000.00, Disponible = true },
-        new Vehiculo { Codigo = "V05", Marca = "Kia", Modelo = "Sportage", Anio = 2023, Precio = 27500.00, Disponible = true }
+        new Vehiculo { Codigo = "V01", Marca = "Toyota", Modelo = "Corolla", Año = 2024, Precio = 22000.00, Disponible = true },
+        new Vehiculo { Codigo = "V02", Marca = "Nissan", Modelo = "Frontier", Año = 2023, Precio = 28000.00, Disponible = true },
+        new Vehiculo { Codigo = "V03", Marca = "Honda", Modelo = "Civic", Año = 2024, Precio = 25500.00, Disponible = true },
+        new Vehiculo { Codigo = "V04", Marca = "Hyundai", Modelo = "Tucson", Año = 2025, Precio = 31000.00, Disponible = true },
+        new Vehiculo { Codigo = "V05", Marca = "Kia", Modelo = "Sportage", Año = 2023, Precio = 27500.00, Disponible = true }
     };
 
     private static int correlativoFactura = 1001;
@@ -88,7 +88,7 @@ public class ControlVentasInventario
         {
             string estado = v.Disponible ? "DISPONIBLE" : "VENDIDO";
             Console.WriteLine(string.Format("{0,-8} {1,-12} {2,-15} {3,-8} ${4,-11:F2} {5,-12}",
-                v.Codigo, v.Marca, v.Modelo, v.Anio, v.Precio, estado));
+                v.Codigo, v.Marca, v.Modelo, v.Año, v.Precio, estado));
         }
 
         Console.WriteLine("\nPresione cualquier tecla para continuar...");
@@ -139,7 +139,7 @@ public class ControlVentasInventario
             Codigo = codigo,
             Marca = marca,
             Modelo = modelo,
-            Anio = anio,
+            Año = anio,
             Precio = precio,
             Disponible = true
         });
@@ -202,7 +202,7 @@ public class ControlVentasInventario
             Numero = correlativoFactura++,
             CodigoVendedor = empleado.Codigo,
             Cliente = cliente,
-            DescripcionVehiculo = $"{vehiculo.Marca} {vehiculo.Modelo} ({vehiculo.Anio})",
+            DescripcionVehiculo = $"{vehiculo.Marca} {vehiculo.Modelo} ({vehiculo.Año})",
             Precio = subtotal,
             PorcentajeImpuesto = tasaIva,
             Total = total,
