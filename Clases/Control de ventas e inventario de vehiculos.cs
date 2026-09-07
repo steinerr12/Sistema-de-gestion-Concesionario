@@ -14,7 +14,7 @@ public class Vehiculo
 
 public class ControlVentasInventario
 {
-    // Catálogo disponible del concesionario
+    // Catálogo compartido de vehículos para que tu compañera pueda marcar ventas sobre ellos
     public static List<Vehiculo> InventarioVehiculos = new List<Vehiculo>()
     {
         new Vehiculo { Codigo = "V01", Marca = "Toyota", Modelo = "Corolla", Año = 2024, Precio = 22000.00, Disponible = true },
@@ -24,8 +24,6 @@ public class ControlVentasInventario
         new Vehiculo { Codigo = "V05", Marca = "Kia", Modelo = "Sportage", Año = 2023, Precio = 27500.00, Disponible = true }
     };
 
-    private static int correlativoFactura = 1001;
-
     public void Menu()
     {
         int opcion = 0;
@@ -33,13 +31,11 @@ public class ControlVentasInventario
         {
             Console.Clear();
             Console.WriteLine("=================================================");
-            Console.WriteLine("     CONTROL DE VENTAS E INVENTARIO DE AUTOS     ");
+            Console.WriteLine("        INVENTARIO DE VEHÍCULOS ACTUALES         ");
             Console.WriteLine("=================================================");
             Console.WriteLine("1. Ver inventario general (Disponibilidad)");
             Console.WriteLine("2. Agregar nuevo vehículo al inventario");
-            Console.WriteLine("3. Registrar venta y generar factura");
-            Console.WriteLine("4. Reporte de ventas por empleado");
-            Console.WriteLine("5. Volver al Menú Principal");
+            Console.WriteLine("3. Volver al Menú Principal");
             Console.WriteLine("=================================================");
             Console.Write("Seleccione una opción: ");
 
@@ -54,12 +50,6 @@ public class ControlVentasInventario
                         AgregarVehiculo();
                         break;
                     case 3:
-                        RegistrarVentaYFacturar();
-                        break;
-                    case 4:
-                        ReporteVentasEmpleado();
-                        break;
-                    case 5:
                         break;
                     default:
                         Console.WriteLine("\n[ERROR] Opción no válida.");
@@ -72,7 +62,7 @@ public class ControlVentasInventario
                 Console.WriteLine("\n[ERROR] Ingrese un número válido.");
                 Console.ReadKey();
             }
-        } while (opcion != 5);
+        } while (opcion != 3);
     }
 
     private void MostrarInventario()
@@ -145,118 +135,6 @@ public class ControlVentasInventario
         });
 
         Console.WriteLine("\n[ÉXITO] Vehículo añadido correctamente al inventario.");
-        Console.ReadKey();
-    }
-
-    private void RegistrarVentaYFacturar()
-    {
-        Console.Clear();
-        Console.WriteLine("==============================================");
-        Console.WriteLine("        VENTA DE VEHÍCULO Y FACTURACIÓN       ");
-        Console.WriteLine("==============================================");
-
-        // Validar vendedor
-        Console.Write("Código del Vendedor (ej. EMP01): ");
-        string codVendedor = Console.ReadLine()?.Trim().ToUpper();
-
-        var empleado = DatosCompartidos.ListaEmpleados.FirstOrDefault(e => e.Codigo.Equals(codVendedor, StringComparison.OrdinalIgnoreCase));
-        if (empleado == null)
-        {
-            Console.WriteLine("\n[ERROR] El código de empleado no existe.");
-            Console.ReadKey();
-            return;
-        }
-
-        // Validar vehículo disponible
-        Console.Write("Código del Vehículo a vender (ej. V01): ");
-        string codVehiculo = Console.ReadLine()?.Trim().ToUpper();
-
-        var vehiculo = InventarioVehiculos.FirstOrDefault(v => v.Codigo.Equals(codVehiculo, StringComparison.OrdinalIgnoreCase));
-        if (vehiculo == null)
-        {
-            Console.WriteLine("\n[ERROR] El vehículo no existe en el sistema.");
-            Console.ReadKey();
-            return;
-        }
-
-        if (!vehiculo.Disponible)
-        {
-            Console.WriteLine("\n[ALERTA] Este vehículo ya ha sido vendido.");
-            Console.ReadKey();
-            return;
-        }
-
-        // Datos del comprador
-        Console.Write("Nombre completo del cliente: ");
-        string cliente = Console.ReadLine()?.Trim();
-
-        // Cálculos comerciales
-        double subtotal = vehiculo.Precio;
-        double tasaIva = 13.0; // 13% IVA
-        double impuesto = subtotal * (tasaIva / 100);
-        double total = subtotal + impuesto;
-
-        // Generación de factura y actualización de estado
-        Factura nuevaFactura = new Factura
-        {
-            Numero = correlativoFactura++,
-            CodigoVendedor = empleado.Codigo,
-            Cliente = cliente,
-            DescripcionVehiculo = $"{vehiculo.Marca} {vehiculo.Modelo} ({vehiculo.Año})",
-            Precio = subtotal,
-            PorcentajeImpuesto = tasaIva,
-            Total = total,
-            Fecha = DateTime.Now
-        };
-
-        DatosCompartidos.ListaFacturas.Add(nuevaFactura);
-        vehiculo.Disponible = false; // Se descuenta de la disponibilidad
-
-        // Impresión del comprobante
-        Console.Clear();
-        Console.WriteLine("============================================================");
-        Console.WriteLine($"                FACTURA N°: {nuevaFactura.Numero}           ");
-        Console.WriteLine("============================================================");
-        Console.WriteLine($"Fecha: {nuevaFactura.Fecha:dd/MM/yyyy HH:mm}");
-        Console.WriteLine($"Atendido por: {empleado.Nombre} ({empleado.Puesto})");
-        Console.WriteLine($"Cliente     : {nuevaFactura.Cliente}");
-        Console.WriteLine(new string('-', 60));
-        Console.WriteLine($"Vehículo    : {nuevaFactura.DescripcionVehiculo}");
-        Console.WriteLine($"Subtotal    : ${nuevaFactura.Precio,10:F2}");
-        Console.WriteLine($"IVA (13%)   : ${impuesto,10:F2}");
-        Console.WriteLine($"TOTAL PAGADO: ${nuevaFactura.Total,10:F2}");
-        Console.WriteLine("============================================================");
-        Console.WriteLine("[ÉXITO] Venta registrada. El bono ya se reflejará en la Nómina.");
-        Console.WriteLine("\nPresione cualquier tecla para continuar...");
-        Console.ReadKey();
-    }
-
-    private void ReporteVentasEmpleado()
-    {
-        Console.Clear();
-        Console.WriteLine("==========================================================================");
-        Console.WriteLine("                      HISTORIAL DE VENTAS POR EMPLEADO                    ");
-        Console.WriteLine("==========================================================================");
-
-        if (DatosCompartidos.ListaFacturas.Count == 0)
-        {
-            Console.WriteLine("No se han emitido facturas en esta sesión.");
-        }
-        else
-        {
-            foreach (var fact in DatosCompartidos.ListaFacturas)
-            {
-                var vendedor = DatosCompartidos.ListaEmpleados.FirstOrDefault(e => e.Codigo.Equals(fact.CodigoVendedor, StringComparison.OrdinalIgnoreCase));
-                string nombre = vendedor != null ? vendedor.Nombre : fact.CodigoVendedor;
-
-                Console.WriteLine($"Factura #{fact.Numero} | Vendedor: {nombre} ({fact.CodigoVendedor})");
-                Console.WriteLine($"Cliente: {fact.Cliente,-20} | Auto: {fact.DescripcionVehiculo}");
-                Console.WriteLine($"Monto Total: ${fact.Total:F2} | Fecha: {fact.Fecha:dd/MM/yyyy}");
-                Console.WriteLine(new string('-', 74));
-            }
-        }
-
-        Console.WriteLine("\nPresione cualquier tecla para continuar...");
         Console.ReadKey();
     }
 }
