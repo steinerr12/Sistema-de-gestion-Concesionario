@@ -51,7 +51,7 @@ public class CalculadoraNominaSueldos
         Console.WriteLine("                                NÓMINA GENERAL DEL CONCESIONARIO                         ");
         Console.WriteLine("=========================================================================================");
 
-        // Si no hay registros de asistencia aún, usamos una jornada estándar (ej. 44 horas semanales)
+        // Si no hay registros de asistencia aún se usa lo estandar
         bool hayRegistros = DatosCompartidos.HistorialAsistencias.Any(a => a.Salida.HasValue);
         double horasPorDefecto = 44.0;
 
@@ -94,7 +94,7 @@ public class CalculadoraNominaSueldos
                 Console.Write($"No hay asistencias registradas para {emp.Nombre}. Ingrese horas trabajadas: ");
                 if (!double.TryParse(Console.ReadLine(), out horas) || horas < 0)
                 {
-                    horas = 44; // Valor por defecto si ingresan dato inválido
+                    horas = 44; // valor por default :v
                 }
             }
 
@@ -126,20 +126,20 @@ public class CalculadoraNominaSueldos
 
     private void CalcularYMostrarEmpleado(Empleado emp, double horas)
     {
-        // 1. Salario Bruto
+        // Salario Bruto
         double salarioBruto = horas * emp.TarifaHora;
 
-        // 2. Bonificación por ventas (si tiene facturas emitidas en DatosCompartidos)
+        // Bonificación por ventas 
         double totalVentas = DatosCompartidos.ListaFacturas
             .Where(f => f.CodigoVendedor.Equals(emp.Codigo, StringComparison.OrdinalIgnoreCase))
             .Sum(f => f.Total);
 
         double bonoDesempeno = (emp.Puesto.Equals("Vendedor", StringComparison.OrdinalIgnoreCase)) ? totalVentas * 0.03 : 0.0;
 
-        // 3. Retenciones de Ley (ISSS 3% + AFP 7.25% = 10.25%)
+        // Retenciones de Ley (ISSS 3% + AFP 7.25% = 10.25%)
         double retencionesLey = salarioBruto * 0.1025;
 
-        // 4. Sueldo Neto Final
+        // Sueldo Neto Final
         double sueldoNeto = (salarioBruto + bonoDesempeno) - retencionesLey;
 
         Console.WriteLine($"Código: {emp.Codigo} | Nombre: {emp.Nombre,-15} | Puesto: {emp.Puesto,-12}");

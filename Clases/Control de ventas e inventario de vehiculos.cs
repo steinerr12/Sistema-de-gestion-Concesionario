@@ -14,7 +14,7 @@ public class Vehiculo
 
 public class ControlVentasInventario
 {
-    // Catálogo de stock del concesionario
+    // Catálogo disponible del concesionario
     public static List<Vehiculo> InventarioVehiculos = new List<Vehiculo>()
     {
         new Vehiculo { Codigo = "V01", Marca = "Toyota", Modelo = "Corolla", Anio = 2024, Precio = 22000.00, Disponible = true },
@@ -155,7 +155,7 @@ public class ControlVentasInventario
         Console.WriteLine("        VENTA DE VEHÍCULO Y FACTURACIÓN       ");
         Console.WriteLine("==============================================");
 
-        // 1. Validar vendedor
+        // Validar vendedor
         Console.Write("Código del Vendedor (ej. EMP01): ");
         string codVendedor = Console.ReadLine()?.Trim().ToUpper();
 
@@ -167,7 +167,7 @@ public class ControlVentasInventario
             return;
         }
 
-        // 2. Validar vehículo disponible
+        // Validar vehículo disponible
         Console.Write("Código del Vehículo a vender (ej. V01): ");
         string codVehiculo = Console.ReadLine()?.Trim().ToUpper();
 
@@ -186,17 +186,17 @@ public class ControlVentasInventario
             return;
         }
 
-        // 3. Datos del comprador
+        // Datos del comprador
         Console.Write("Nombre completo del cliente: ");
         string cliente = Console.ReadLine()?.Trim();
 
-        // 4. Cálculos comerciales
+        // Cálculos comerciales
         double subtotal = vehiculo.Precio;
         double tasaIva = 13.0; // 13% IVA
         double impuesto = subtotal * (tasaIva / 100);
         double total = subtotal + impuesto;
 
-        // 5. Generación de factura y actualización de estado
+        // Generación de factura y actualización de estado
         Factura nuevaFactura = new Factura
         {
             Numero = correlativoFactura++,
@@ -212,7 +212,7 @@ public class ControlVentasInventario
         DatosCompartidos.ListaFacturas.Add(nuevaFactura);
         vehiculo.Disponible = false; // Se descuenta de la disponibilidad
 
-        // 6. Impresión del comprobante
+        // Impresión del comprobante
         Console.Clear();
         Console.WriteLine("============================================================");
         Console.WriteLine($"                FACTURA N°: {nuevaFactura.Numero}           ");
