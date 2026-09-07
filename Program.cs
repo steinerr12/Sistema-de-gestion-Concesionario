@@ -5,9 +5,11 @@ class Program
     static void Main(string[] args)
     {
         // Instancia de las clases de cada módulo
+        
         AsistenciayPuntualidad asistencia = new AsistenciayPuntualidad();
         GestorTurnosVacaciones turnosVacaciones = new GestorTurnosVacaciones();
-        
+        ControlVentasInventario ventasInventario = new ControlVentasInventario();
+        CalculadoraNominaSueldos nomina = new CalculadoraNominaSueldos();
 
         int opcion = 0;
 
@@ -33,13 +35,13 @@ class Program
                         asistencia.Menu();
                         break;
                     case 2:  //Nomina y sueldo
-                        
+                        nomina.Menu();
                         break;
                     case 3: //Turno y Vacaciones
                         turnosVacaciones.Menu();
                         break;
                     case 4: //venta e inventario
-                      
+                        ventasInventario.Menu();
                         break;
                     case 5:
                         Console.WriteLine("\nSaliendo del sistema... ¡Hasta luego!");
