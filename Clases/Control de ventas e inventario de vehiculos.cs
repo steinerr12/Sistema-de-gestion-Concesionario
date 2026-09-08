@@ -14,6 +14,8 @@ public class Vehiculo
 
 public class ControlVentasInventario
 {
+    // Porcentaje de impuesto fijo 
+    private const double PORCENTAJE_IMPUESTO = 13.0;
     // Catálogo compartido de vehículos para que tu compañera pueda marcar ventas sobre ellos
     public static List<Vehiculo> InventarioVehiculos = new List<Vehiculo>()
     {
@@ -35,7 +37,9 @@ public class ControlVentasInventario
             Console.WriteLine("=================================================");
             Console.WriteLine("1. Ver inventario general (Disponibilidad)");
             Console.WriteLine("2. Agregar nuevo vehículo al inventario");
-            Console.WriteLine("3. Volver al Menú Principal");
+            Console.WriteLine("3. Crear factura de venta");
+            Console.WriteLine("4. Ver facturas emitidas");
+            Console.WriteLine("5. Volver al Menú Principal");
             Console.WriteLine("=================================================");
             Console.Write("Seleccione una opción: ");
 
@@ -50,6 +54,13 @@ public class ControlVentasInventario
                         AgregarVehiculo();
                         break;
                     case 3:
+                        CrearFactura();
+                        break;
+       
+                    case 4:
+                        VerFacturas();
+                        break;
+                    case 5:
                         break;
                     default:
                         Console.WriteLine("\n[ERROR] Opción no válida.");
@@ -62,7 +73,7 @@ public class ControlVentasInventario
                 Console.WriteLine("\n[ERROR] Ingrese un número válido.");
                 Console.ReadKey();
             }
-        } while (opcion != 3);
+        } while (opcion != 5);
     }
 
     private void MostrarInventario()
@@ -135,6 +146,129 @@ public class ControlVentasInventario
         });
 
         Console.WriteLine("\n[ÉXITO] Vehículo añadido correctamente al inventario.");
+        Console.ReadKey();
+    }
+    private void CrearFactura()
+    {
+        Console.Clear();
+        Console.WriteLine("==============================================");
+        Console.WriteLine("              CREAR FACTURA DE VENTA          ");
+        Console.WriteLine("==============================================");
+
+        
+        Console.Write("Código del vendedor (ej. EMP01): ");
+        string codigoVendedor = Console.ReadLine()?.Trim().ToUpper();
+
+        var vendedor = DatosCompartidos.ListaEmpleados
+            .FirstOrDefault(e => e.Codigo.Equals(codigoVendedor, StringComparison.OrdinalIgnoreCase)
+                               && e.Puesto == "Vendedor");
+
+        if (vendedor == null)
+        {
+            Console.WriteLine("\n[ERROR] Código no válido o el empleado no es Vendedor.");
+            Console.ReadKey();
+            return;
+        }
+
+        Console.Write("Nombre del cliente: ");
+        string cliente = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(cliente))
+        {
+            Console.WriteLine("\n[ERROR] El nombre del cliente no puede estar vacío.");
+            Console.ReadKey();
+            return;
+        }
+
+     
+        Console.Write("Código del vehículo (ej. V01): ");
+        string codigoVehiculo = Console.ReadLine()?.Trim().ToUpper();
+
+        var vehiculo = InventarioVehiculos
+            .FirstOrDefault(v => v.Codigo.Equals(codigoVehiculo, StringComparison.OrdinalIgnoreCase));
+
+        if (vehiculo == null)
+        {
+            Console.WriteLine("\n[ERROR] No existe un vehículo con ese código.");
+            Console.ReadKey();
+            return;
+        }
+
+        if (!vehiculo.Disponible)
+        {
+            Console.WriteLine("\n[ERROR] Este vehículo ya fue vendido y no está disponible.");
+            Console.ReadKey();
+            return;
+        }
+
+        // --- Impuesto ---
+        double impuesto = vehiculo.Precio * (PORCENTAJE_IMPUESTO / 100);
+
+        double total = vehiculo.Precio + impuesto;
+        int numeroFactura = DatosCompartidos.ListaFacturas.Count + 1;
+
+        var factura = new Factura
+        {
+            Numero = numeroFactura,
+            CodigoVendedor = vendedor.Codigo,
+            Cliente = cliente,
+            CodigoVehiculo = vehiculo.Codigo,
+            DescripcionVehiculo = $"{vehiculo.Marca} {vehiculo.Modelo} {vehiculo.Año}",
+            Precio = vehiculo.Precio,
+            PorcentajeImpuesto = PORCENTAJE_IMPUESTO,
+            Total = total,
+            Fecha = DateTime.Now
+        };
+
+        // Registro de factura
+        DatosCompartidos.ListaFacturas.Add(factura);
+        vehiculo.Disponible = false;
+
+        Console.Clear();
+        Console.WriteLine("==============================================");
+        Console.WriteLine("           FACTURA GENERADA CON ÉXITO         ");
+        Console.WriteLine("==============================================");
+        Console.WriteLine($"Factura N°:      {factura.Numero}");
+        Console.WriteLine($"Fecha:           {factura.Fecha:dd/MM/yyyy HH:mm}");
+        Console.WriteLine($"Vendedor:        {vendedor.Nombre} ({vendedor.Codigo})");
+        Console.WriteLine($"Cliente:         {factura.Cliente}");
+        Console.WriteLine($"Vehículo:        {factura.DescripcionVehiculo} ({factura.CodigoVehiculo})");
+        Console.WriteLine($"Precio:          ${factura.Precio:F2}");
+        Console.WriteLine($"Impuesto ({factura.PorcentajeImpuesto}%): ${impuesto:F2}");
+        Console.WriteLine("----------------------------------------------");
+        Console.WriteLine($"TOTAL:           ${factura.Total:F2}");
+        Console.WriteLine("==============================================");
+
+        Console.WriteLine("\nPresione cualquier tecla para continuar...");
+        Console.ReadKey();
+    }
+
+    private void VerFacturas()
+    {
+        Console.Clear();
+        Console.WriteLine("================================================================================");
+        Console.WriteLine("                          FACTURAS EMITIDAS                                    ");
+        Console.WriteLine("================================================================================");
+
+        if (DatosCompartidos.ListaFacturas.Count == 0)
+        {
+            Console.WriteLine("No hay facturas registradas todavía.");
+        }
+        else
+        {
+            Console.WriteLine(string.Format("{0,-6} {1,-10} {2,-15} {3,-25} {4,-10} {5,-10}",
+                "N°", "VENDEDOR", "CLIENTE", "VEHÍCULO", "TOTAL", "FECHA"));
+            Console.WriteLine(new string('-', 80));
+
+            foreach (var f in DatosCompartidos.ListaFacturas)
+            {
+                Console.WriteLine(string.Format("{0,-6} {1,-10} {2,-15} {3,-25} ${4,-9:F2} {5,-10}",
+                    f.Numero, f.CodigoVendedor, f.Cliente, f.DescripcionVehiculo, f.Total,
+                    f.Fecha.ToString("dd/MM/yyyy")));
+            }
+        }
+
+        Console.WriteLine("\nPresione cualquier tecla para continuar...");
         Console.ReadKey();
     }
 }

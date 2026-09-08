@@ -37,12 +37,14 @@ public class Factura
     public int Numero { get; set; }
     public string CodigoVendedor { get; set; }
     public string Cliente { get; set; }
+    public string CodigoVehiculo { get; set; }
     public string DescripcionVehiculo { get; set; }
     public double Precio { get; set; }
     public double PorcentajeImpuesto { get; set; }
     public double Total { get; set; }
     public DateTime Fecha { get; set; }
 }
+
 
 public static class DatosCompartidos
 {
