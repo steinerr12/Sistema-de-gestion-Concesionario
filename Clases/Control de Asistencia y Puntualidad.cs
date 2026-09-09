@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class AsistenciayPuntualidad
 {
+
     // =========================================================================
     // Codigos de los empleados
     // - EMP01: Carlos Pérez
@@ -13,30 +14,6 @@ public class AsistenciayPuntualidad
     // - EMP05: Luis Fernández
     // =========================================================================
 
-    private class Empleado
-    {
-        public string Codigo { get; set; }
-        public string Nombre { get; set; }
-    }
-
-    private class Asistencia
-    {
-        public string CodigoEmpleado { get; set; }
-        public DateTime Entrada { get; set; }
-        public DateTime? Salida { get; set; }
-        public bool Tarde { get; set; }
-    }
-
-    private List<Empleado> empleados = new List<Empleado>()
-    {
-        new Empleado { Codigo = "EMP01", Nombre = "Carlos Pérez" },
-        new Empleado { Codigo = "EMP02", Nombre = "María Gómez" },
-        new Empleado { Codigo = "EMP03", Nombre = "Juan Rodríguez" },
-        new Empleado { Codigo = "EMP04", Nombre = "Ana Martínez" },
-        new Empleado { Codigo = "EMP05", Nombre = "Luis Fernández" }
-    };
-
-    private List<Asistencia> registros = new List<Asistencia>();
     private readonly TimeSpan horaLimite = new TimeSpan(8, 0, 0);
 
     public void Menu()
@@ -89,9 +66,10 @@ public class AsistenciayPuntualidad
     private void ListarEmpleados()
     {
         Console.WriteLine("\nLista de empleados:");
-        foreach (var e in empleados)
+        // Usamos la lista global de empleados compartida con los demás módulos
+        foreach (var e in DatosCompartidos.ListaEmpleados)
         {
-            Console.WriteLine($"[{e.Codigo}] {e.Nombre}");
+            Console.WriteLine($"[{e.Codigo}] {e.Nombre} - {e.Puesto}");
         }
     }
 
@@ -100,15 +78,7 @@ public class AsistenciayPuntualidad
         Console.Write("\nIngresa el código del empleado: ");
         string cod = Console.ReadLine()?.Trim().ToUpper();
 
-        Empleado emp = null;
-        foreach (var e in empleados)
-        {
-            if (e.Codigo == cod)
-            {
-                emp = e;
-                break;
-            }
-        }
+        var emp = DatosCompartidos.ListaEmpleados.Find(e => e.Codigo == cod);
 
         if (emp == null)
         {
@@ -119,7 +89,8 @@ public class AsistenciayPuntualidad
         DateTime ahora = DateTime.Now;
         bool tarde = ahora.TimeOfDay > horaLimite;
 
-        registros.Add(new Asistencia
+        // Guardamos directamente en el historial compartido global
+        DatosCompartidos.HistorialAsistencias.Add(new RegistroAsistencia
         {
             CodigoEmpleado = emp.Codigo,
             Entrada = ahora,
@@ -139,15 +110,9 @@ public class AsistenciayPuntualidad
         Console.Write("\nIngresa el código del empleado para la salida: ");
         string cod = Console.ReadLine()?.Trim().ToUpper();
 
-        Asistencia regActivo = null;
-        foreach (var r in registros)
-        {
-            if (r.CodigoEmpleado == cod && r.Salida == null)
-            {
-                regActivo = r;
-                break;
-            }
-        }
+        // Buscamos el registro activo (sin salida) en la lista global
+        var regActivo = DatosCompartidos.HistorialAsistencias
+            .Find(r => r.CodigoEmpleado.Equals(cod, StringComparison.OrdinalIgnoreCase) && r.Salida == null);
 
         if (regActivo != null)
         {
@@ -163,13 +128,13 @@ public class AsistenciayPuntualidad
     private void VerHistorial()
     {
         Console.WriteLine("\nHistorial de asistencias:");
-        if (registros.Count == 0)
+        if (DatosCompartidos.HistorialAsistencias.Count == 0)
         {
             Console.WriteLine("Aún no hay registros.");
             return;
         }
 
-        foreach (var r in registros)
+        foreach (var r in DatosCompartidos.HistorialAsistencias)
         {
             string salidaStr = r.Salida.HasValue ? r.Salida.Value.ToShortTimeString() : "En turno";
             string tardeStr = r.Tarde ? "Sí" : "No";
