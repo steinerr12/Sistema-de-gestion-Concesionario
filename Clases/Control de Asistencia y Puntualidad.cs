@@ -1,20 +1,9 @@
-﻿// Control de Asistencia y Puntualidad.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 public class AsistenciayPuntualidad
 {
-
-    // =========================================================================
-    // Codigos de los empleados
-    // - EMP01: Carlos Pérez
-    // - EMP02: María Gómez
-    // - EMP03: Juan Rodríguez
-    // - EMP04: Ana Martínez
-    // - EMP05: Luis Fernández
-    // =========================================================================
-
-    private readonly TimeSpan horaLimite = new TimeSpan(8, 0, 0);
+    private TimeSpan horaLimite = new TimeSpan(8, 0, 0); // Decklaramos la hora de llegada
 
     public void Menu()
     {
@@ -66,7 +55,6 @@ public class AsistenciayPuntualidad
     private void ListarEmpleados()
     {
         Console.WriteLine("\nLista de empleados:");
-        // Usamos la lista global de empleados compartida con los demás módulos
         foreach (var e in DatosCompartidos.ListaEmpleados)
         {
             Console.WriteLine($"[{e.Codigo}] {e.Nombre} - {e.Puesto}");
@@ -86,19 +74,33 @@ public class AsistenciayPuntualidad
             return;
         }
 
-        DateTime ahora = DateTime.Now;
-        bool tarde = ahora.TimeOfDay > horaLimite;
+        // Pedimos la fecha y la hora manual 
+        Console.Write("Fecha de entrada (dd/mm/aaaa): ");
+        string fIngresada = Console.ReadLine();
 
-        // Guardamos directamente en el historial compartido global
+        Console.Write("Hora de entrada (ej. 08:30): ");
+        string hIngresada = Console.ReadLine();
+
+        // Intentamos armar la fecha con lo que puso el usuario
+        if (!DateTime.TryParse(fIngresada, out DateTime fecha) || !TimeSpan.TryParse(hIngresada, out TimeSpan hora))
+        {
+            Console.WriteLine("\n[ERROR] Fecha u hora inválida.");
+            return;
+        }
+
+        DateTime entradaFinal = fecha.Date + hora;
+        bool tarde = entradaFinal.TimeOfDay > horaLimite;
+
+        // Lo guardamos en la lista global para que la nómina lo lea bien
         DatosCompartidos.HistorialAsistencias.Add(new RegistroAsistencia
         {
             CodigoEmpleado = emp.Codigo,
-            Entrada = ahora,
+            Entrada = entradaFinal,
             Salida = null,
             Tarde = tarde
         });
 
-        Console.WriteLine($"Entrada registrada para {emp.Nombre} a las {ahora.ToShortTimeString()}");
+        Console.WriteLine($"\nEntrada registrada para {emp.Nombre} el {entradaFinal:dd/MM/yyyy} a las {entradaFinal:HH:mm}");
         if (tarde)
         {
             Console.WriteLine("Nota: El empleado llegó tarde.");
@@ -110,19 +112,40 @@ public class AsistenciayPuntualidad
         Console.Write("\nIngresa el código del empleado para la salida: ");
         string cod = Console.ReadLine()?.Trim().ToUpper();
 
-        // Buscamos el registro activo (sin salida) en la lista global
+        // Buscamos si tiene algún turno abierto 
         var regActivo = DatosCompartidos.HistorialAsistencias
             .Find(r => r.CodigoEmpleado.Equals(cod, StringComparison.OrdinalIgnoreCase) && r.Salida == null);
 
-        if (regActivo != null)
+        if (regActivo == null)
         {
-            regActivo.Salida = DateTime.Now;
-            Console.WriteLine($"Salida registrada a las {regActivo.Salida.Value.ToShortTimeString()}");
+            Console.WriteLine("No hay un registro de entrada pendiente para este empleado.");
+            return;
         }
-        else
+
+        Console.WriteLine($"Entrada pendiente encontrada del día: {regActivo.Entrada:dd/MM/yyyy HH:mm}");
+
+        Console.Write("Fecha de salida (dd/mm/aaaa): ");
+        string fIngresada = Console.ReadLine();
+
+        Console.Write("Hora de salida (ej. 17:00): ");
+        string hIngresada = Console.ReadLine();
+
+        if (!DateTime.TryParse(fIngresada, out DateTime fecha) || !TimeSpan.TryParse(hIngresada, out TimeSpan hora))
         {
-            Console.WriteLine("No hay un registro de entrada pendiente para este código.");
+            Console.WriteLine("\n[ERROR] Fecha u hora inválida.");
+            return;
         }
+
+        DateTime salidaFinal = fecha.Date + hora;
+
+        if (salidaFinal <= regActivo.Entrada)
+        {
+            Console.WriteLine("\n[ERROR] La salida no puede ser antes o al mismo tiempo que la entrada.");
+            return;
+        }
+
+        regActivo.Salida = salidaFinal;
+        Console.WriteLine($"\nSalida registrada con éxito para el {salidaFinal:dd/MM/yyyy} a las {salidaFinal:HH:mm}");
     }
 
     private void VerHistorial()
@@ -136,9 +159,9 @@ public class AsistenciayPuntualidad
 
         foreach (var r in DatosCompartidos.HistorialAsistencias)
         {
-            string salidaStr = r.Salida.HasValue ? r.Salida.Value.ToShortTimeString() : "En turno";
+            string salidaStr = r.Salida.HasValue ? r.Salida.Value.ToString("dd/MM/yyyy HH:mm") : "En turno";
             string tardeStr = r.Tarde ? "Sí" : "No";
-            Console.WriteLine($"Empleado: {r.CodigoEmpleado} | Fecha: {r.Entrada.ToShortDateString()} | Entrada: {r.Entrada.ToShortTimeString()} | Salida: {salidaStr} | Tarde: {tardeStr}");
+            Console.WriteLine($"EMP: {r.CodigoEmpleado} | Entrada: {r.Entrada:dd/MM/yyyy HH:mm} | Salida: {salidaStr} | Tarde: {tardeStr}");
         }
     }
 }
